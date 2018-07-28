@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta content="IE=edge" http-equiv="X-UA-Compatible">
+		<meta content="width=device-width, initial-scale=1" name="viewport">
+		<link rel="icon" href="./favicon.ico" type="image/x-icon">
+		<title>Text to Speech | Hoangvux</title>
+		<meta property="og:title" content="Text to Speech | Hoangvux">
+		<meta name="description" content="Get audio from Bing Microsoft Translator.">
+		<meta property="og:site_name" content="Text to Speech | Hoangvux">
+		<meta property="og:description" content="Get audio from Bing Microsoft Translator.">
+		<meta property="og:image" content="https://hoangvux.github.io/text-to-speech/og-image.png">
+
+		<style>
+	    	body {     
+	    	background: url(./background.jpg) no-repeat center center fixed;
+	    	background-size: cover;
+	    	background-attachment:fixed;
+	    	}
+		</style>
+	</head>
+<body>
+	<center>
+		<p><b><a href="https://hoangvux.github.io/text-to-speech">TEXT TO SPEECH</a></b> - Get audio from Bing Microsoft Translator</p>
+		<textarea id="langSource" onkeyup="countChar(this)" placeholder="Enter text here" maxlength="5000" aria-label="Text to be translated" style="background: transparent none repeat scroll 0% 0% !important; z-index: auto; padding:5px; position: relative; height: 400px; width: 800px;font-size: 14px; transition: none 0s ease 0s;"></textarea>
+		<br>
+		<br>
+		<select id="langSelect">
+			<option value="en">English</option>
+			<option value="vi">Vietnamese</option>
+		</select>
+		<button id="getAudioBtn" style="width: 150px; height: 20px;">Get audio</button>
+		<br>
+		<br>
+		<audio id="audioEl" autoplay controls></audio>
+		<p>Copyright © 2018 <a href="https://github.com/Hoangvux">Hoangvux</a> - Hosted on <a href="https://github.com/Hoangvux/text-to-speech">GitHub</a></p>
+	</center>
+	<!-- Default JavaScript -->
+	<script src="https://code.jquery.com/jquery-1.5.js"></script>
+	<script type="text/javascript">
+		// When the DOM (basically the HTML) is loaded
+		document.addEventListener('DOMContentLoaded', function () {
+			// Define your DOM elements
+			var getAudioBtn = document.getElementById('getAudioBtn'),
+				langSelect = document.getElementById("langSelect"),
+				langSource = document.getElementById("langSource"),
+				audioEl = document.getElementById('audioEl');
+			// Setup an event listener on the button
+			getAudioBtn.addEventListener('click', getContentTranslate);
+			// Setup an listener on the audio onended event
+			audioEl.addEventListener('ended', readChunkQueue);
+			var chunkQueue = [], // Queue of chunks of text to read
+				wordsPerChunk = 180, // Words per chunk
+				language = 'vi'; // Default language
+			function getContentTranslate() {
+				// Store the language
+				language = langSelect.value;
+				// Empty the chunks array
+				chunkQueue = [];
+				// Split the text into words
+				var words = langSource.value.split(/ /g),
+					tmp = []; // Temporary array for creating a chunk
+				while (words.length) {
+					// If out temporary chunk is full, add it to the list
+					if (tmp.length === wordsPerChunk) {
+						chunkQueue.push(tmp.join(' '));
+						tmp = [];
+					}
+					tmp.push(words.shift());
+				}
+				if (tmp.length) {
+					chunkQueue.push(tmp.join(' '));
+				}
+				// Start reading these chunks
+				readChunkQueue();
+			}
+			function readChunkQueue() {
+				// If the list is empty, stop
+				if (!chunkQueue.length) {
+					return;
+				}
+				// Get the first chunk in the list
+				var chunk = chunkQueue.shift(),
+					url = 'https://www.bing.com/tspeak?&format=audio%2Fmp3' +
+					'&language=' + encodeURIComponent(language) +
+					'&IG=D2CBB80AA6824D9A91B0A5D1074FC4A1&IID=translator.5034.2' +
+					'&text=' + encodeURIComponent(chunk);
+				// Set the URL as source for the audio element
+				audioEl.setAttribute('src', url);
+			}
+		});
+	</script>
+</body>
+</html>
